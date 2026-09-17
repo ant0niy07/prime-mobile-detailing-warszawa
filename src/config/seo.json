@@ -1,0 +1,18 @@
+{
+  "fallbackUrl": "https://example.com",
+  "pl": {
+    "title": "Mobilny detailing wnętrza Warszawa | PRIME Mobile Detailing",
+    "description": "Mobilny detailing i profesjonalne czyszczenie wnętrza samochodu z dojazdem w Warszawie i okolicach. Własne zasilanie — bez potrzeby udostępniania gniazdka 230 V.",
+    "privacyTitle": "Prywatność | PRIME Mobile Detailing"
+  },
+  "en": {
+    "title": "Mobile Interior Detailing Warsaw | PRIME Mobile Detailing",
+    "description": "Professional mobile car interior detailing across Warsaw and nearby areas. We bring our own power supply — no 230 V socket needed.",
+    "privacyTitle": "Privacy | PRIME Mobile Detailing"
+  },
+  "ru": {
+    "title": "Выездной детейлинг салона Варшава | PRIME Mobile Detailing",
+    "description": "Профессиональная чистка салона с выездом по Варшаве и окрестностям. Собственный источник питания — ваша розетка 230 В не нужна.",
+    "privacyTitle": "Конфиденциальность | PRIME Mobile Detailing"
+  }
+}

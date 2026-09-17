@@ -1,0 +1,320 @@
+import type { Dictionary } from "./pl";
+export const en: Dictionary = {
+  nav: ["Services", "Packages", "How it works", "Results", "FAQ", "Contact"],
+  quote: "Get my car quoted",
+  shortQuote: "Get a quote",
+  whatsapp: "Chat on WhatsApp",
+  photosCta: "Share interior photos",
+  menu: "Open menu",
+  close: "Close",
+  skip: "Skip to content",
+  from: "from",
+  currency: "PLN",
+  eyebrow: "MOBILE INTERIOR DETAILING • WARSAW & NEARBY",
+  hero: ["Professional interior detailing", "right where", "you park."],
+  intro:
+    "We come to your address with professional equipment and our own power supply. No trip to a studio. No need to provide a 230 V socket.",
+  trust: [
+    "Warsaw and nearby areas",
+    "Our own power supply",
+    "Professional equipment",
+    "Individual quotes",
+  ],
+  power: "Your 230 V socket: not needed",
+  ready: "Ready to work on location",
+  status: [
+    "Vehicle interior",
+    "Equipment on site",
+    "Power active",
+    "Kärcher Puzzi 8/1",
+  ],
+  illustrative: "Illustrative photo",
+  interiorAlt:
+    "Carefully finished car interior with leather upholstery — illustrative photo",
+  autonomyTitle: "We arrive ready to work.",
+  autonomyText:
+    "Our portable power station lets us work without using your socket. We bring the equipment, cleaning products and accessories we need.",
+  autonomy: [
+    "Independent power",
+    "Kärcher Puzzi 8/1",
+    "Professional products",
+    "We come to you",
+  ],
+  garage:
+    "Work in an underground garage is possible only where building rules, available space, ventilation and technical conditions allow it. Permission to carry out the work is required.",
+  benefitEyebrow: "A CLEAN INTERIOR. MORE TIME FOR YOU.",
+  benefitTitle: "You get on with your day. We take care of your interior.",
+  benefitText:
+    "At home, in a suitable parking space or near your workplace. No studio visit or leaving your car somewhere else.",
+  benefits: [
+    "For apartment and house residents",
+    "For families and pet owners",
+    "Before selling or after buying a car",
+    "For everyday, family and premium cars",
+  ],
+  drying:
+    "Upholstery needs time to dry after extraction cleaning. Drying depends on the material, weather, ventilation and work carried out.",
+  serviceEyebrow: "YOUR INTERIOR, IN GOOD HANDS",
+  serviceTitle: "Every material. Every detail.",
+  serviceIntro:
+    "We focus on what you touch and experience on every journey — exclusively inside your car.",
+  services: [
+    {
+      title: "Fabric & upholstery",
+      text: "Extraction cleaning for seats, rear benches, carpeting and mats. Stain treatment where the material allows it.",
+    },
+    {
+      title: "Interior surfaces",
+      text: "Plastics, dashboard, steering wheel, door panels, sills, seals and interior glass. Cleaning and appropriate care.",
+    },
+    {
+      title: "Stubborn contamination",
+      text: "Pet hair, hard-to-reach areas, heavily used interiors and unpleasant odour neutralisation.",
+    },
+    {
+      title: "Leather upholstery",
+      text: "Careful cleaning, conditioning and protection matched to the leather type and its current condition.",
+    },
+  ],
+  resultDisclaimer:
+    "The scope and achievable result depend on the material, age of the stains and condition of the interior. Some stains and permanent damage cannot be completely removed.",
+  packageEyebrow: "CHOOSE THE CARE YOU NEED",
+  packageTitle: "Three packages. One standard of care.",
+  popular: "Most popular",
+  packageCta: "Ask for a quote",
+  packages: [
+    {
+      text: "Essential interior cleaning and a fresh feel.",
+      items: [
+        "Vacuuming throughout the interior",
+        "Fabric seat, rear bench and mat extraction cleaning where applicable",
+        "Basic plastic cleaning",
+        "Interior window cleaning",
+        "Interior refresh",
+      ],
+    },
+    {
+      text: "More detailed cleaning and care for key interior surfaces.",
+      items: [
+        "Everything in BASIC",
+        "Detailed cleaning of plastics and interior surfaces",
+        "Steering wheel and dashboard care",
+        "Sill and seal cleaning",
+        "Plastic protection and UV care where appropriate",
+        "Rubber element care",
+      ],
+    },
+    {
+      text: "Comprehensive interior detailing tailored to your car and its condition.",
+      items: [
+        "Everything in BASIC PLUS",
+        "Detailed pet hair removal where needed",
+        "Thorough mat and carpet cleaning",
+        "Hard-to-reach areas",
+        "Leather cleaning and care where present",
+        "Detailed interior protection and finishing",
+      ],
+    },
+  ],
+  priceNote:
+    "These are starting prices. Your final quote depends on vehicle size, upholstery, interior condition, dirt, pet hair, stains and the agreed scope of work.",
+  priceConfirm:
+    "We confirm the price after receiving your vehicle details and interior photos.",
+  processEyebrow: "SIMPLE. FROM YOUR FIRST MESSAGE.",
+  processTitle: "Detailing without the studio trip",
+  process: [
+    {
+      title: "Share the details",
+      text: "Tell us your car model, location, interior condition and preferred date.",
+    },
+    {
+      title: "Add photos",
+      text: "Photos help us assess the work and prepare an initial quote.",
+    },
+    {
+      title: "Agree the scope",
+      text: "We contact you to confirm the price, appointment and working conditions.",
+    },
+    {
+      title: "We come to you",
+      text: "We bring professional equipment, cleaning products and our own power supply.",
+    },
+  ],
+  resultsEyebrow: "ATTENTION YOU CAN SEE",
+  resultsTitle: "A fresh perspective on your interior.",
+  resultsText:
+    "Real PRIME projects will appear here. For now, these are illustrative photos, not results of our work.",
+  comparisonDemo:
+    "Comparison preview • the same photo on both sides, with no simulated service result.",
+  before: "Before",
+  after: "After",
+  compareLabel: "Move the photo comparison divider",
+  equipmentTitle: "Professional equipment. Fully mobile.",
+  equipmentText:
+    "Kärcher Puzzi 8/1 for controlled extraction cleaning. Our own power station. Professional brushes and tools, with products chosen for each material.",
+  equipmentTags: [
+    "Extraction cleaning",
+    "Independent power",
+    "Material-specific care",
+  ],
+  areaTitle: "Warsaw. And a little further.",
+  areaText:
+    "We travel across Warsaw and nearby towns. Tell us your location — we confirm availability and any travel conditions before booking.",
+  faqTitle: "Good questions. Straight answers.",
+  faq: [
+    [
+      "Do you need a 230 V socket?",
+      "We have our own power supply, so we do not need access to your 230 V socket to carry out the service.",
+    ],
+    [
+      "Can you work in an underground garage?",
+      "Yes, where building rules, management permission, ventilation, space and technical conditions allow it. We agree this before the visit.",
+    ],
+    [
+      "How much does the service cost?",
+      "BASIC starts at {basic} PLN, BASIC PLUS at {plus} PLN and PREMIUM at {premium} PLN. The final price depends on your car, its interior condition and the agreed work.",
+    ],
+    [
+      "Do I have to send photos?",
+      "Photos are recommended, but optional. They help us assess dirt and prepare a more accurate quote. Attach them manually in WhatsApp.",
+    ],
+    [
+      "Can you remove every stain?",
+      "No. Results depend on the material and the type and age of the stain. Cleaning cannot reverse permanent material damage.",
+    ],
+    [
+      "How long does upholstery take to dry?",
+      "It depends on the material, weather, ventilation and cleaning scope. There is no single drying time for every car.",
+    ],
+    [
+      "Can I use the car straight away?",
+      "This depends on the service and how dry the upholstery is. After extraction cleaning, you may need to wait before using the car.",
+    ],
+    [
+      "Do you clean leather upholstery?",
+      "Yes. We first assess the type and condition of the leather, then choose suitable cleaning and care products.",
+    ],
+    [
+      "Do you remove pet hair?",
+      "Yes. Heavy pet hair may need additional work and affect the price. Photos help show how much there is.",
+    ],
+    [
+      "Do you detail car exteriors?",
+      "Our current services focus exclusively on car interiors. We do not offer exterior detailing.",
+    ],
+  ],
+  contactEyebrow: "A QUOTE WITH NO OBLIGATION",
+  contactTitle: "Show us the inside of your car.",
+  contactText:
+    "Send your car model, location and a few photos. We will assess the work and suggest a suitable package.",
+  contactCta: "Send photos on WhatsApp",
+  privacy: "Privacy",
+  interiorOnly: "We specialise exclusively in automotive interior detailing.",
+  backHome: "Back to home",
+  privacyTitle: "Privacy and your data",
+  privacyParagraphs: [
+    "This website has no database or form that submits data to a PRIME server. Your enquiry is prepared locally in your browser.",
+    "Selected photos stay in your browser and are not uploaded to a PRIME server. You need to select them again after reloading the page. You attach them yourself in WhatsApp.",
+    "Opening WhatsApp passes the prepared message to WhatsApp/Meta under that provider’s terms. You send the message yourself in the conversation. Facebook and Instagram also have their own privacy policies.",
+    "localStorage stores your language and unfinished form on this device. Photos and consent are not saved. Drafts expire after 7 days. You can delete the draft below or in the configurator.",
+    "We do not use analytics or marketing cookies. The hosting provider may process technical connection data needed to operate the website.",
+    "Full controller details and legal information are awaiting confirmation from the owner. For data enquiries, contact the listed WhatsApp Business number.",
+  ],
+  form: {
+    title: "Get a quote for your interior",
+    intro: "A few details. Care tailored to your car.",
+    steps: [
+      "Vehicle",
+      "Package",
+      "Interior",
+      "Location",
+      "Date",
+      "Details & photos",
+      "Contact",
+      "Summary",
+    ],
+    vehicle: "Make and model",
+    vehiclePlaceholder: "e.g. Toyota Corolla",
+    size: "Vehicle size",
+    sizes: ["Small", "Compact / sedan", "Estate", "SUV", "Van / 7 seats"],
+    package: "Selected package",
+    help: "Not sure — help me choose",
+    conditions: "Interior condition and upholstery",
+    conditionsHint: "Select all that apply.",
+    conditionOptions: [
+      "Regular maintenance",
+      "Visible dirt",
+      "Heavy dirt",
+      "Stains",
+      "Pet hair",
+      "Unpleasant odour",
+      "Fabric upholstery",
+      "Leather upholstery",
+      "Mixed upholstery",
+    ],
+    district: "Warsaw district or nearby town",
+    address: "Address or approximate location",
+    parking: "Parking type",
+    parkingOptions: [
+      "Outdoor parking",
+      "Private parking space",
+      "Underground garage",
+      "Other",
+    ],
+    date: "Preferred date",
+    time: "Preferred time range",
+    timePlaceholder: "e.g. 10:00–14:00",
+    flexible: "My date is flexible",
+    dateNote:
+      "This is a preference, not a confirmed booking. We will discuss availability with you.",
+    description: "What should we know about the interior?",
+    descriptionPlaceholder:
+      "Describe the condition and what matters most to you…",
+    photos: "Interior photos (optional)",
+    photoHint: "JPEG, PNG or WebP • up to 8 photos • 8 MB per photo",
+    photoNote:
+      "Selected photos stay in your browser. WhatsApp does not let websites attach files automatically — add them directly in the chat after it opens.",
+    remove: "Remove photo",
+    name: "Name",
+    phone: "Phone number",
+    contactMethod: "Preferred contact",
+    contactOptions: ["WhatsApp", "Phone"],
+    consent:
+      "I understand that my details are prepared locally and passed to WhatsApp when I open the conversation. I have read the privacy information.",
+    next: "Continue",
+    prev: "Back",
+    copy: "Copy summary",
+    send: "Send via WhatsApp",
+    edit: "Go back and edit",
+    clear: "Delete saved draft",
+    cleared: "Your draft has been deleted.",
+    saved: "Draft saved on this device for 7 days. Photos are not saved.",
+    summary: "Your enquiry",
+    selectedPhotos: "Selected photo count",
+    finalPrice:
+      "We will confirm the final quote after assessing the car, work required and photos.",
+    unknownPrice: "Price to be agreed individually",
+    copied: "Summary copied. Attach photos manually in WhatsApp.",
+    copyFailed: "Could not copy. Select and copy the message below.",
+    opening: "WhatsApp opened. Send the message and attach photos yourself.",
+    required: "Please complete this field.",
+    tooLong: "Please shorten the text in this field.",
+    phoneError: "Enter a valid phone number (7–15 digits).",
+    consentError: "Please acknowledge the privacy information.",
+    dateError: "Choose today or a future date, or select a flexible date.",
+    typeError: "Only JPEG, PNG and WebP photos are supported.",
+    sizeError: "Each photo must be 8 MB or smaller.",
+    countError: "You can select up to 8 photos.",
+    errorSummary: "Check the highlighted fields before continuing.",
+    messageTitle: "Hello! I would like a quote for interior detailing.",
+    messageEnd:
+      "Please confirm the scope, price and availability. I will attach photos manually in the chat.",
+    notProvided: "Not provided",
+    step: "Step",
+    of: "of",
+    optional: "optional",
+  },
+  seoTitle: "Mobile Interior Detailing Warsaw | PRIME Mobile Detailing",
+  seoDescription:
+    "Professional mobile car interior detailing across Warsaw and nearby areas. We bring our own power supply — no 230 V socket needed.",
+};

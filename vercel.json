@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/:lang(pl|en|ru)/privacy",
+      "destination": "/:lang/privacy/index.html"
+    },
+    {
+      "source": "/:lang(pl|en|ru)",
+      "destination": "/:lang/index.html"
+    },
+    {
+      "source": "/((?!assets/|images/|flags/|favicon.svg|og.jpg|robots.txt|sitemap.xml).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
