@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useForm, useWatch, type FieldPath } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
 import {
@@ -11,12 +11,18 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { business, type Lang } from "../config/business";
+import {
+  pricing,
+  dirtLevels,
+  problemIds,
+  type CalculatorState,
+} from "../config/pricing";
 import type { Dictionary } from "../i18n";
 import {
   buildMessage,
-  conditions,
   copyText,
   emptyQuote,
+  formatEstimate,
   parkings,
   quoteSchema,
   sizes,
@@ -26,72 +32,87 @@ import {
   type Quote,
 } from "../lib/quote";
 import { clearDraft, loadDraft, saveDraft } from "../lib/draft";
-import { PhotoPicker, type Photo } from "./PhotoPicker";
-const stepFields: FieldPath<Quote>[][] = [
-  ["vehicle", "size"],
-  ["package"],
-  ["conditions"],
-  ["district", "address", "parking"],
-  ["date", "time", "flexible"],
-  ["description"],
-  ["name", "phone", "consent", "contactMethod"],
+import { clearPhotos, usePhotoSession } from "../lib/photos";
+import {
+  quoteSubmissionAdapter,
+  canSharePhotos,
+  sharePhotos,
+} from "../lib/submission";
+import { sharing } from "../i18n/sharing";
+import { track } from "../lib/tracking";
+import { PhotoPicker } from "./PhotoPicker";
+const stepFields: (keyof Quote)[][] = [
+  ["vehicle", "size", "package"],
+  [
+    "condition",
+    "problems",
+    "district",
+    "address",
+    "parking",
+    "serviceSpace",
+    "power",
+  ],
+  ["date", "time", "flexible", "description"],
+  ["name", "phone", "email", "consent", "contactMethod"],
 ];
 export default function QuoteConfigurator({
   t,
   lang,
   initialPackage,
+  initialState,
   onClose,
 }: {
   t: Dictionary;
   lang: Lang;
   initialPackage?: Quote["package"];
+  initialState?: CalculatorState;
   onClose: () => void;
 }) {
-  const f = t.form;
-  const [step, setStep] = useState(0);
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  const [toast, setToast] = useState("");
-  const [manual, setManual] = useState(false);
-  const [attempted, setAttempted] = useState(false);
-  const photoRef = useRef(photos);
+  const f = t.form,
+    c = t.calculator;
+  const [step, setStep] = useState(0),
+    [photos, setPhotos] = usePhotoSession(),
+    [toast, setToast] = useState(""),
+    [manual, setManual] = useState(false),
+    [attempted, setAttempted] = useState(false),
+    [busy, setBusy] = useState(false),
+    [fallback, setFallback] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const {
     register,
     control,
     trigger,
-    getValues,
+    getFieldState,
     reset,
     formState: { errors },
   } = useForm<Quote>({
     resolver: zodResolver(quoteSchema(f)),
     defaultValues: {
       ...loadDraft(),
+      ...(initialState
+        ? Object.fromEntries(
+            Object.entries(initialState).filter(([, v]) => v !== undefined),
+          )
+        : {}),
       ...(initialPackage ? { package: initialPackage } : {}),
     },
     mode: "onTouched",
   });
   const values = useWatch({ control }) as Quote;
-  useEffect(() => {
-    saveDraft(values);
-  }, [values]);
-  useEffect(() => {
-    photoRef.current = photos;
-  }, [photos]);
-  useEffect(
-    () => () => photoRef.current.forEach((p) => URL.revokeObjectURL(p.url)),
-    [],
-  );
+  useEffect(() => saveDraft(values), [values]);
   useEffect(() => {
     heading.current?.focus();
   }, [step]);
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(""), 8000);
-    return () => clearTimeout(timer);
-  }, [toast]);
   const field = (
     key:
-      "vehicle" | "district" | "address" | "time" | "name" | "phone" | "date",
+      | "vehicle"
+      | "district"
+      | "address"
+      | "time"
+      | "name"
+      | "phone"
+      | "date"
+      | "email",
     label: string,
     placeholder = "",
     type = "text",
@@ -101,27 +122,27 @@ export default function QuoteConfigurator({
       <input
         id={key}
         type={type}
-        placeholder={placeholder}
         {...register(key)}
+        placeholder={placeholder}
         maxLength={
           key === "address"
             ? 200
-            : key === "vehicle"
-              ? 120
-              : key === "name"
-                ? 100
-                : key === "time"
-                  ? 100
-                  : 150
+            : key === "email"
+              ? 254
+              : key === "vehicle"
+                ? 120
+                : 100
         }
         autoComplete={
           key === "name"
             ? "given-name"
             : key === "phone"
               ? "tel"
-              : key === "address"
-                ? "street-address"
-                : "off"
+              : key === "email"
+                ? "email"
+                : key === "address"
+                  ? "street-address"
+                  : "off"
         }
         min={key === "date" ? today() : undefined}
         aria-invalid={!!errors[key]}
@@ -141,20 +162,47 @@ export default function QuoteConfigurator({
       setAttempted(false);
     }
   };
-  const copy = async () => {
-    const ok = await copyText(buildMessage(getValues(), t, photos.length));
-    setManual(!ok);
-    setToast(ok ? f.copied : f.copyFailed);
-  };
   const message = buildMessage(values, t, photos.length);
-  const selectedPackage = business.packages.find(
-    (p) => p.id === values.package,
-  );
+  const send = async () => {
+    if (busy) return;
+    if (!(await trigger())) {
+      const invalid = stepFields.findIndex((fields) =>
+        fields.some((k) => getFieldState(k).invalid),
+      );
+      setStep(Math.max(invalid, 0));
+      setAttempted(true);
+      return;
+    }
+    setBusy(true);
+    setFallback(false);
+    try {
+      const result = await quoteSubmissionAdapter.submit({
+        message,
+        photos: photos.map((p) => p.file),
+      });
+      if (result.status === "handoff") {
+        setFallback(true);
+        setManual(!result.copied);
+        setToast(`${f.opening}${result.copied ? "" : ` ${f.copyFailed}`}`);
+        track("submit_quote", { mode: "whatsapp" });
+        track("click_whatsapp");
+      } else if (result.status === "confirmed") setToast(f.success);
+      else {
+        setToast(f.unavailable);
+        setFallback(true);
+      }
+    } catch {
+      setToast(f.error);
+      setFallback(true);
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <div className="configurator">
       <div className="quote-heading">
         <span className="eyebrow">
-          {business.logo} / {f.step} {step + 1} {f.of} 8
+          {business.name} / {f.step} {step + 1} {f.of} 5
         </span>
         <h2>{f.title}</h2>
         <p>{f.intro}</p>
@@ -172,11 +220,11 @@ export default function QuoteConfigurator({
         ))}
       </ol>
       <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (step < 7) void next();
-        }}
         noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (step < 4) void next();
+        }}
       >
         <h3 ref={heading} tabIndex={-1}>
           {f.steps[step]}
@@ -190,67 +238,87 @@ export default function QuoteConfigurator({
           <>
             {field("vehicle", f.vehicle, f.vehiclePlaceholder)}
             <fieldset>
-              <legend>{f.size}</legend>
+              <legend>{c.size}</legend>
               <div className="options">
                 {sizes.map((v, i) => (
                   <label className="option" key={v}>
                     <input type="radio" value={v} {...register("size")} />
-                    <span>{f.sizes[i]}</span>
+                    <span>{c.sizes[i]}</span>
                   </label>
                 ))}
               </div>
             </fieldset>
-          </>
-        )}
-        {step === 1 && (
-          <fieldset>
-            <legend className="sr-only">{f.package}</legend>
-            <div className="options package-options">
-              {[
-                ...business.packages,
-                { id: "help", name: f.help, price: 0 },
-              ].map((p) => (
-                <label className="option" key={p.id}>
-                  <input type="radio" value={p.id} {...register("package")} />
-                  <span>
-                    <strong>{p.name}</strong>
-                    {p.price > 0 && (
+            <fieldset>
+              <legend>{f.package}</legend>
+              <div className="options package-options">
+                {business.packages.map((p) => (
+                  <label className="option" key={p.id}>
+                    <input type="radio" value={p.id} {...register("package")} />
+                    <span>
+                      <strong>{p.name}</strong>
                       <small>
                         {t.from} {p.price} {t.currency}
                       </small>
-                    )}
-                  </span>
-                </label>
-              ))}
-            </div>
-            <p className="note">{t.priceConfirm}</p>
-          </fieldset>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <p className="note">
+              {
+                t.packages[
+                  business.packages.findIndex((p) => p.id === values.package)
+                ].note
+              }
+            </p>
+          </>
         )}
-        {step === 2 && (
-          <fieldset>
-            <legend>{f.conditions}</legend>
-            <p className="note">{f.conditionsHint}</p>
-            <div className="options">
-              {conditions.map((v, i) => (
-                <label className="option" key={v}>
-                  <input
-                    type="checkbox"
-                    value={v}
-                    {...register("conditions")}
-                  />
-                  <span>{f.conditionOptions[i]}</span>
-                </label>
-              ))}
-            </div>
-            {errors.conditions && (
-              <p className="error" role="alert">
-                {errors.conditions.message}
-              </p>
-            )}
-          </fieldset>
-        )}
-        {step === 3 && (
+        {step === 1 && (
           <>
+            <fieldset>
+              <legend>{c.condition}</legend>
+              <div className="options">
+                {dirtLevels.map((v, i) => (
+                  <label className="option" key={v}>
+                    <input type="radio" value={v} {...register("condition")} />
+                    <span>{c.levels[i]}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>{c.problems}</legend>
+              <div className="options">
+                {problemIds.map((v, i) => (
+                  <label className="option" key={v}>
+                    <input
+                      type="checkbox"
+                      value={v}
+                      {...register("problems")}
+                    />
+                    <span>{c.problemOptions[i]}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>{c.power}</legend>
+              <div className="options">
+                {(["customer", "prime"] as const).map((v, i) => (
+                  <label className="option" key={v}>
+                    <input type="radio" value={v} {...register("power")} />
+                    <span>
+                      {c.powerOptions[i]}
+                      <small>
+                        {v === "prime" && pricing.power[values.package]
+                          ? `+${pricing.power[values.package]} ${t.currency}`
+                          : c.powerIncluded}
+                      </small>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             {field("district", f.district)}
             {field("address", `${f.address} (${f.optional})`)}
             <fieldset>
@@ -267,9 +335,24 @@ export default function QuoteConfigurator({
             {values.parking === "garage" && (
               <p className="warning">{t.garage}</p>
             )}
+            <fieldset>
+              <legend>{f.serviceSpace}</legend>
+              <div className="options">
+                {["yes", "unsure"].map((v, i) => (
+                  <label className="option" key={v}>
+                    <input
+                      type="radio"
+                      value={v}
+                      {...register("serviceSpace")}
+                    />
+                    <span>{f.spaceOptions[i]}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           </>
         )}
-        {step === 4 && (
+        {step === 2 && (
           <>
             {field("date", f.date, "", "date")}
             {field("time", `${f.time} (${f.optional})`, f.timePlaceholder)}
@@ -278,10 +361,6 @@ export default function QuoteConfigurator({
               {f.flexible}
             </label>
             <p className="note">{f.dateNote}</p>
-          </>
-        )}
-        {step === 5 && (
-          <>
             <div className="field">
               <label htmlFor="description">
                 {f.description} ({f.optional})
@@ -289,18 +368,19 @@ export default function QuoteConfigurator({
               <textarea
                 id="description"
                 {...register("description")}
-                placeholder={f.descriptionPlaceholder}
+                rows={3}
                 maxLength={2000}
-                rows={4}
+                placeholder={f.descriptionPlaceholder}
               />
             </div>
             <PhotoPicker photos={photos} onChange={setPhotos} t={f} />
           </>
         )}
-        {step === 6 && (
+        {step === 3 && (
           <>
             {field("name", f.name)}
             {field("phone", f.phone, "+48", "tel")}
+            {field("email", `${f.email} (${f.optional})`, "", "email")}
             <fieldset>
               <legend>{f.contactMethod}</legend>
               <div className="options">
@@ -321,6 +401,7 @@ export default function QuoteConfigurator({
                 type="checkbox"
                 {...register("consent")}
                 aria-invalid={!!errors.consent}
+                aria-describedby={errors.consent ? "consent-error" : undefined}
               />
               <span>
                 {f.consent}{" "}
@@ -330,14 +411,18 @@ export default function QuoteConfigurator({
               </span>
             </label>
             {errors.consent && (
-              <p className="error" role="alert">
+              <p id="consent-error" className="error" role="alert">
                 {errors.consent.message}
               </p>
             )}
           </>
         )}
-        {step === 7 && (
+        {step === 4 && (
           <div className="summary">
+            <div className="summary-price" role="status">
+              <strong>{formatEstimate(values, t)}</strong>
+              <p>{c.note}</p>
+            </div>
             <dl>
               {summaryRows(values, t, photos.length).map(([k, v]) => (
                 <div key={k}>
@@ -346,61 +431,81 @@ export default function QuoteConfigurator({
                 </div>
               ))}
             </dl>
-            <div className="summary-price">
-              {selectedPackage ? (
-                <span>
-                  {t.from} <strong>{selectedPackage.price}</strong> {t.currency}
-                </span>
-              ) : (
-                f.unknownPrice
-              )}
-              <p>{f.finalPrice}</p>
-            </div>
             <p className="warning">{f.photoNote}</p>
+            {canSharePhotos(photos.map((p) => p.file)) && (
+              <div className="photo-share">
+                <p className="note">{sharing[lang].hint}</p>
+                <button
+                  type="button"
+                  className="btn secondary"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    try {
+                      const result = await sharePhotos({
+                        message,
+                        photos: photos.map((p) => p.file),
+                      });
+                      if (result === "shared") setToast(sharing[lang].shared);
+                      if (result === "unavailable")
+                        setToast(sharing[lang].failed);
+                    } catch {
+                      setToast(sharing[lang].failed);
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                >
+                  {sharing[lang].action}
+                </button>
+              </div>
+            )}
             <div className="summary-actions">
-              <button className="btn secondary" type="button" onClick={copy}>
-                <Copy size={18} />
-                {f.copy}
-              </button>
-              <a
-                className="btn whatsapp"
-                href={whatsappLink(message)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={async (e) => {
-                  e.preventDefault();
-                  if (!(await trigger())) {
-                    setStep(0);
-                    return;
-                  }
+              <button
+                className="btn secondary"
+                type="button"
+                onClick={async () => {
                   const ok = await copyText(message);
                   setManual(!ok);
                   setToast(ok ? f.copied : f.copyFailed);
-                  const a = document.createElement("a");
-                  a.href = whatsappLink(message);
-                  a.target = "_blank";
-                  a.rel = "noopener noreferrer";
-                  document.body.append(a);
-                  a.click();
-                  a.remove();
                 }}
               >
+                <Copy size={17} />
+                {f.copy}
+              </button>
+              <button
+                type="button"
+                className="btn primary"
+                disabled={busy}
+                onClick={send}
+              >
                 <MessageCircle size={18} />
-                {f.send}
-              </a>
+                {busy ? f.submitting : f.send}
+              </button>
             </div>
-            {manual && (
-              <textarea
-                aria-label={f.summary}
-                readOnly
-                value={message}
-                rows={10}
-                onFocus={(e) => e.currentTarget.select()}
-              />
+            {(manual || fallback) && (
+              <>
+                <textarea
+                  aria-label={f.summary}
+                  readOnly
+                  rows={8}
+                  value={message}
+                  onFocus={(e) => e.currentTarget.select()}
+                />
+                <a
+                  className="btn whatsapp"
+                  href={whatsappLink(message)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => track("click_whatsapp")}
+                >
+                  {t.whatsapp}
+                </a>
+              </>
             )}
             <button
-              className="text-button"
               type="button"
+              className="text-button"
               onClick={() => setStep(0)}
             >
               <ArrowLeft size={16} />
@@ -408,7 +513,7 @@ export default function QuoteConfigurator({
             </button>
           </div>
         )}
-        {step < 7 && (
+        {step < 4 && (
           <div className="form-actions">
             <button
               type="button"
@@ -419,12 +524,12 @@ export default function QuoteConfigurator({
                 setAttempted(false);
               }}
             >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={17} />
               {f.prev}
             </button>
             <button type="submit" className="btn primary">
               {f.next}
-              <ArrowRight size={18} />
+              <ArrowRight size={17} />
             </button>
           </div>
         )}
@@ -436,12 +541,12 @@ export default function QuoteConfigurator({
           className="text-button"
           onClick={() => {
             reset({ ...emptyQuote });
-            photoRef.current.forEach((p) => URL.revokeObjectURL(p.url));
-            setPhotos([]);
+            clearPhotos();
+            clearDraft();
             setStep(0);
             setManual(false);
+            setFallback(false);
             setAttempted(false);
-            clearDraft();
             setToast(f.cleared);
           }}
         >

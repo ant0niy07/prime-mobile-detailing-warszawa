@@ -1,14 +1,22 @@
-import { emptyQuote, sizes, parkings, conditions, type Quote } from "./quote";
-export const DRAFT_KEY = "prime.quote.v1";
+import { emptyQuote, parkings, type Quote } from "./quote";
+import {
+  packageIds,
+  vehicleSizes,
+  dirtLevels,
+  problemIds,
+} from "../config/pricing";
+import { CALCULATOR_KEY } from "./pricing";
+export const DRAFT_KEY = "prime.quote.v2";
+const LEGACY_KEY = "prime.quote.v1";
 const TTL = 7 * 24 * 60 * 60 * 1000;
 export function saveDraft(data: Quote) {
-  if (
-    JSON.stringify({ ...data, consent: false }) === JSON.stringify(emptyQuote)
-  ) {
-    clearDraft();
-    return;
-  }
   try {
+    if (
+      JSON.stringify({ ...data, consent: false }) === JSON.stringify(emptyQuote)
+    ) {
+      localStorage.removeItem(DRAFT_KEY);
+      return;
+    }
     localStorage.setItem(
       DRAFT_KEY,
       JSON.stringify({
@@ -17,53 +25,72 @@ export function saveDraft(data: Quote) {
       }),
     );
   } catch {
-    /* Storage is optional. */
+    /* Optional storage. */
   }
 }
 export function clearDraft() {
+  if (typeof window !== "undefined")
+    window.dispatchEvent(new Event("prime:clear-draft"));
   try {
-    localStorage.removeItem(DRAFT_KEY);
+    for (const key of [DRAFT_KEY, LEGACY_KEY, CALCULATOR_KEY])
+      localStorage.removeItem(key);
   } catch {
-    /* Storage may be disabled. */
+    /* No persistent data in unavailable storage. */
   }
 }
 export function loadDraft(): Quote {
   try {
-    const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+    const saved = JSON.parse(
+      localStorage.getItem(DRAFT_KEY) ||
+        localStorage.getItem(LEGACY_KEY) ||
+        "null",
+    );
     if (
       !saved ||
       typeof saved.expires !== "number" ||
       saved.expires < Date.now()
     ) {
-      clearDraft();
+      localStorage.removeItem(DRAFT_KEY);
+      localStorage.removeItem(LEGACY_KEY);
       return { ...emptyQuote };
     }
-    const q = { ...emptyQuote };
-    const d = saved.data;
-    for (const key of [
-      "vehicle",
-      "district",
-      "address",
-      "date",
-      "time",
-      "description",
-      "name",
-      "phone",
-    ] as const)
-      if (typeof d[key] === "string") q[key] = d[key].slice(0, 2000);
-    if (sizes.includes(d.size)) q.size = d.size;
+    const d = saved.data,
+      q = { ...emptyQuote };
+    const limits = {
+      vehicle: 120,
+      district: 150,
+      address: 200,
+      date: 10,
+      time: 100,
+      description: 2000,
+      name: 100,
+      phone: 30,
+      email: 254,
+    };
+    for (const key of Object.keys(limits) as Array<keyof typeof limits>)
+      if (typeof d[key] === "string") q[key] = d[key].slice(0, limits[key]);
+    if (packageIds.includes(d.package)) q.package = d.package;
+    if (vehicleSizes.includes(d.size)) q.size = d.size;
+    else if (d.size === "estate") q.size = "sedan";
+    if (dirtLevels.includes(d.condition)) q.condition = d.condition;
+    else if (d.conditions?.includes("heavy")) q.condition = "heavy";
     if (parkings.includes(d.parking)) q.parking = d.parking;
-    if (["basic", "plus", "premium", "help"].includes(d.package))
-      q.package = d.package;
-    if (Array.isArray(d.conditions))
-      q.conditions = d.conditions.filter((c: (typeof conditions)[number]) =>
-        conditions.includes(c),
-      );
+    q.problems = (
+      Array.isArray(d.problems)
+        ? d.problems
+        : Array.isArray(d.conditions)
+          ? d.conditions
+          : []
+    ).filter((v: unknown) =>
+      problemIds.includes(v as (typeof problemIds)[number]),
+    );
+    q.power = d.power === "prime" ? "prime" : "customer";
+    q.serviceSpace = d.serviceSpace === "yes" ? "yes" : "unsure";
     q.flexible = d.flexible === true;
     q.contactMethod = d.contactMethod === "phone" ? "phone" : "whatsapp";
+    localStorage.removeItem(LEGACY_KEY);
     return q;
   } catch {
-    clearDraft();
     return { ...emptyQuote };
   }
 }
@@ -71,6 +98,6 @@ export function persistLanguage(lang: string) {
   try {
     localStorage.setItem("prime.language", lang);
   } catch {
-    /* Language still works through routes. */
+    /* Routes still work. */
   }
 }

@@ -1,18 +1,30 @@
 {
-  "fallbackUrl": "https://example.com",
+  "fallbackUrl": "https://primemobdetail.pl",
   "pl": {
-    "title": "Mobilny detailing wnętrza Warszawa | PRIME Mobile Detailing",
-    "description": "Mobilny detailing i profesjonalne czyszczenie wnętrza samochodu z dojazdem w Warszawie i okolicach. Własne zasilanie — bez potrzeby udostępniania gniazdka 230 V.",
-    "privacyTitle": "Prywatność | PRIME Mobile Detailing"
+    "title": "Mobilny detailing wnętrza Warszawa | Prime Mob Detail",
+    "description": "Mobilny detailing wnętrza w Warszawie. Pakiety od {basic} zł, wycena ze zdjęć, Family & Pet i obsługa flot. Własne zasilanie dostępne jako opcja.",
+    "privacyTitle": "Prywatność | Prime Mob Detail",
+    "fleetTitle": "Flota firmy? Przyjedziemy do niej. | Prime Mob Detail",
+    "fleetDescription": "Mobilna obsługa flot samochodowych w Warszawie i okolicach.",
+    "blogTitle": "Praktycznie o czystym wnętrzu. | Prime Mob Detail",
+    "blogDescription": "Koszt, przygotowanie auta, sierść i pielęgnacja materiałów. Poradniki o tym, co warto wiedzieć przed usługą i po niej."
   },
   "en": {
-    "title": "Mobile Interior Detailing Warsaw | PRIME Mobile Detailing",
-    "description": "Professional mobile car interior detailing across Warsaw and nearby areas. We bring our own power supply — no 230 V socket needed.",
-    "privacyTitle": "Privacy | PRIME Mobile Detailing"
+    "title": "Mobile Interior Detailing Warsaw | Prime Mob Detail",
+    "description": "Mobile car interior detailing in Warsaw. Packages from {basic} zł, photo-based quotes, Family & Pet and fleet service. Independent power available as an option.",
+    "privacyTitle": "Privacy | Prime Mob Detail",
+    "fleetTitle": "A company fleet? We come to it. | Prime Mob Detail",
+    "fleetDescription": "Mobile fleet interior cleaning in Warsaw and nearby areas.",
+    "blogTitle": "Practical advice for your interior. | Prime Mob Detail",
+    "blogDescription": "Costs, preparing your car, pet hair and material care. What to know before a service and afterwards."
   },
   "ru": {
-    "title": "Выездной детейлинг салона Варшава | PRIME Mobile Detailing",
-    "description": "Профессиональная чистка салона с выездом по Варшаве и окрестностям. Собственный источник питания — ваша розетка 230 В не нужна.",
-    "privacyTitle": "Конфиденциальность | PRIME Mobile Detailing"
+    "title": "Выездной детейлинг салона Варшава | Prime Mob Detail",
+    "description": "Выездной детейлинг салона в Варшаве. Пакеты от {basic} zł, расчёт по фото, Family & Pet и автопарки. Собственное питание доступно как опция.",
+    "privacyTitle": "Конфиденциальность | Prime Mob Detail",
+    "fleetTitle": "Автопарк компании? Приедем к нему. | Prime Mob Detail",
+    "fleetDescription": "Выездная чистка салонов автопарков в Варшаве и окрестностях.",
+    "blogTitle": "Практично о чистом салоне. | Prime Mob Detail",
+    "blogDescription": "Стоимость, подготовка авто, шерсть и уход за материалами. Что стоит знать до услуги и после неё."
   }
 }

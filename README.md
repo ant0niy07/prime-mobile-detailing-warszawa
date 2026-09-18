@@ -1,96 +1,82 @@
-# PRIME Mobile Detailing Warszawa
+# Prime Mob Detail
 
-Mobile automotive **interior-only** detailing website. Built directly in the local Windows repository on `main`. React + Vite + strict TypeScript SPA, with Polish, English and Russian routes, a local enquiry configurator and WhatsApp handoff. There is no database, payment flow or fake submission endpoint.
+Existing local Windows React + Vite + TypeScript project, redesigned for mobile **car interior** detailing in Warsaw. Production origin: https://primemobdetail.pl. No exterior services, fake results, ratings or company facts.
 
-## Run locally
+## Local development
 
-Node.js 22.12+ (validated with Node 24) and npm are required.
+Node 22.12+ (validated on Node 24), npm and the existing lockfile:
 
 ```powershell
-npm install
+npm ci
 npm run dev
-```
-
-Open the URL printed by Vite. `/` redirects to `/pl`; `/en` and `/ru` are complete language versions. Each has a `/privacy` route. The route is authoritative; language changes also persist in localStorage. Root deliberately remains Polish as requested.
-
-## Architecture and editing
-
-- `src/config/business.ts`: the single source for brand, contacts, external links, package prices, service area, site URL and pending legal identity fields.
-- `src/i18n/{pl,en,ru}.ts`: typed complete dictionaries. English and Russian must match the Polish dictionary shape.
-- `src/config/gallery.ts`: image paths and comparison mode.
-- `src/components/QuoteConfigurator.tsx`: lazy-loaded eight-step enquiry, React Hook Form + Zod.
-- `src/lib/quote.ts`: validation, safe photo checks, localized summary/message and clipboard fallback.
-- `src/lib/draft.ts`: versioned, validated localStorage draft with seven-day expiry; consent and photographs are not stored.
-- `src/components/Dialog.tsx`: native modal dialog, focus containment, Escape, focus restoration and scroll locking.
-- `src/components/UI.tsx`: shared buttons, images, reduced-motion reveal, comparison and FAQ.
-- `src/App.tsx`: routes, localized metadata, header, page sections and footer.
-- `src/styles.css`: responsive visual system and Tailwind entry point.
-
-The design combines a dark automotive hero and technical power-status panel with light service, pricing and FAQ sections. Locally hosted Manrope, Inter and Geist Mono fonts avoid remote font requests. Native dialogs and semantic details elements provide baseline keyboard behavior. Animations are restrained and respect reduced-motion preferences.
-
-Current starting prices: BASIC **199 zł**, BASIC PLUS **299 zł**, PREMIUM **449 zł**. Final quotes depend on the vehicle, material, condition and agreed work. Changing prices must be done in business configuration.
-
-Future sofa, armchair or mattress services should be added as a distinct service category with its own routes, dictionaries, schema fields and image data. Keep the current automotive packages separate; do not advertise future services before the owner confirms availability.
-
-## WhatsApp and photos
-
-The form validates vehicle, interior condition, location, date preference and contact details. It prepares a localized message, copies it via the Clipboard API (with `execCommand` and manual-copy fallbacks), and opens the verified WhatsApp conversation. **The user still sends the message in WhatsApp.** Opening a conversation does not mean the enquiry was sent or an appointment confirmed.
-
-Only JPEG, PNG and WebP files are accepted, up to 8 images and 8 MB per file. Previews use browser object URLs and are revoked when removed or when the configurator unmounts. Nothing is uploaded. WhatsApp cannot receive file attachments from a `wa.me` link, so the customer must attach photographs manually in the chat. Photos must be reselected after closing/reloading the form; text data remains in a local draft. Both the configurator and privacy page provide a draft deletion control. Storage-disabled browsing still works without persistence.
-
-## Images and replacing the preview
-
-See [CREDITS.md](CREDITS.md) for source pages and licenses. Two Unsplash photographs are stored locally as 640, 1200 and 1920 pixel WebP variants. No image is hotlinked or claimed as a PRIME customer result.
-
-The comparison component intentionally displays the **same illustrative image on both sides**. It is a functional, keyboard- and touch-accessible preview, not an invented before/after result.
-
-To publish real results:
-
-1. Obtain owner-supplied paired photos and permission to publish them. Remove identifying details as appropriate.
-2. Optimize and add local images under `public/images/`, with matched crops and dimensions.
-3. Update `gallery.comparison.before` and `.after`, set `.kind` to `real`, and update the localized results introduction and alternative text in all three dictionaries.
-4. Review `CREDITS.md` and repeat responsive QA. Do not label stock imagery as a client project.
-
-`scripts/assets.mjs` rebuilds the current optimized assets/OG image from the original `artifacts/interior.jpg` and `artifacts/detail.jpg` downloads; originals are deliberately ignored. Their URLs are documented in CREDITS. Asset generation is not required to build or deploy the site because the optimized files are committed.
-
-## Production URL and SEO
-
-Set `VITE_SITE_URL` to the final HTTPS origin, **without a path**, e.g. your real domain. `.env.example` documents the variable; never commit `.env` or `.env.local`. On Vercel, use the project environment settings and redeploy after changing it.
-
-Until supplied, a centralized safe `https://example.com` fallback in `src/config/seo.json` is used; the build generates `robots.txt` with `Disallow: /` to avoid indexing placeholder metadata. Set the real origin before launch. Localized Helmet metadata includes titles, descriptions, canonical URLs, hreflang, Open Graph image and LocalBusiness/service JSON-LD without invented addresses, ratings or reviews. `scripts/seo.mjs` generates `robots.txt`, `sitemap.xml` and localized HTML heads in the build output, so social preview crawlers can read metadata without executing JavaScript. The application itself remains a Vite SPA.
-
-## Vercel import settings
-
-Import the existing [GitHub repository](https://github.com/ant0niy07/prime-mobile-detailing-warszawa) with:
-
-| Setting          | Value                                       |
-| ---------------- | ------------------------------------------- |
-| Framework Preset | **Vite**                                    |
-| Root Directory   | **./**                                      |
-| Build Command    | **npm run build**                           |
-| Output Directory | **dist**                                    |
-| Install Command  | **Default**                                 |
-| Environment      | **VITE_SITE_URL = your final HTTPS origin** |
-
-`vercel.json` contains only SPA route rewrites, allowing direct refresh on language and privacy routes while leaving static assets untouched. No Next.js settings or secrets are required. This repository is ready to import; pushing code does not independently create a Vercel project.
-
-## Validation
-
-```powershell
 npm run lint
 npm run typecheck
-npm run test
+npm test
 npm run build
-npm audit --omit=dev
-git diff --check
+npm run qa
+node scripts/qa-pages.mjs
 ```
 
-For real browser QA, start `npm run dev`, then run `npm run qa` in another terminal. The QA script uses locally installed Microsoft Edge through Playwright. It checks 320, 375, 768, 1024 and 1440 pixel widths; all three languages; refresh; overflow; broken images; safe links; mobile navigation; the complete form; local photo selection; keyboard controls; console errors; and axe WCAG A/AA checks. Screenshots and detailed results go to ignored `artifacts/`. Set `QA_URL` to test a preview server instead. Automated accessibility checks do not establish complete WCAG certification.
+`/pl`, `/ru`, `/en` remain the localized home routes. `/` uses an explicit saved language preference or Polish. `/privacy`, `/floty`, `/blog`, `/blog/:slug` and `/admin` live below each locale. Short `/floty`, `/blog`, `/admin` URLs redirect to Polish. Language switching preserves logical pages; article translations use the configured translation group.
 
-## Owner input before public launch
+## Structure
 
-- Final production domain for `VITE_SITE_URL`.
-- Genuine before/after photographs with publication permission.
-- Verified legal controller identity, applicable registration/address details and privacy contact, plus the owner's final privacy wording. Centralized placeholders in `business.legal` are intentionally empty; fake identity details are never displayed. Review the localized privacy text when filling these fields.
+| Location                                                        | Responsibility                                                                                                     |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `src/config/business.ts`                                        | Brand, contacts, service area, legal fields, site origin                                                           |
+| `src/config/pricing.ts`                                         | The single source for package prices, vehicle increments, power and condition fees                                 |
+| `src/lib/pricing.ts`                                            | Pure estimation, recommendations, calculator persistence                                                           |
+| `src/i18n/{pl,en,ru}.ts`                                        | Typed consumer content and forms                                                                                   |
+| `src/i18n/equipment.ts` / `extended.ts`                         | Equipment, fleet, blog and admin in all three languages                                                            |
+| `src/components/Landing.tsx`                                    | Hero, package rows, calculator, process, Family & Pet, equipment, materials, area, fleet/blog entry points and FAQ |
+| `src/components/QuoteConfigurator.tsx`                          | Lazy five-step enquiry; native dialog remains accessible                                                           |
+| `src/lib/quote.ts`, `draft.ts`, `photos.ts`, `submission.ts`    | Validation, seven-day text draft, per-tab photo session, honest WhatsApp handoff                                   |
+| `src/components/Fleet.tsx`, `src/lib/fleet.ts`                  | Separate B2B form, validation and honeypot                                                                         |
+| `src/config/cases.ts`                                           | Empty verified cases/reviews data, with permission gates                                                           |
+| `src/config/equipment.ts`                                       | Real equipment image slots and process/package comparison                                                          |
+| `src/lib/cms.ts`, `Admin.tsx`, `Blog.tsx`, `ArticleContent.tsx` | Supabase API boundary, protected block editor, public articles, safe rendering                                     |
+| `supabase/migrations/202609190001_cms.sql`                      | Database policies and image bucket                                                                                 |
+| `api/`, `server/`, `scripts/seo.mjs`                            | Dynamic article metadata/sitemap and static localized heads                                                        |
+| `src/lib/tracking.ts`                                           | Disabled, typed, consent-gated analytics adapter                                                                   |
 
-No email, studio address, opening hours, customer reviews, company statistics, qualifications or guaranteed results have been invented.
+## Pricing
+
+Starting prices for S: BASIC 249, BASIC PLUS 349, PREMIUM 499, FAMILY & PET 649 zł. Vehicle increments: S 0, M +50, L +100, XL +150; VAN is individual. Premium therefore starts at 499 / 549 / 599 / 649 zł. Condition and substantial pet hair each add a preliminary 50–150 zł range outside the ordinary included Family & Pet scope. Extreme/unusual contamination is individual. Children, leather, odour and stains do not independently create invented micro-fees.
+
+Suitable customer 230 V has no power fee. PRIME autonomous power: BASIC +150, BASIC PLUS +100, PREMIUM +70, FAMILY & PET included. No travel fee is configured; location is transferred for confirmation. All displays and summaries read the same config. FAQ monetary tokens and SEO starting-price tokens are resolved from it.
+
+The seven-step calculator transfers package, size, condition, problems, power and location to the quote. Recommendations do not replace the customer's package automatically. Price confirmation is subject only to substantial differences from supplied photos/description or requested extra scope.
+
+## Enquiry behaviour
+
+The five-step quote gathers car/package, condition/location/power, date/photos, contact, then summary. JPEG/PNG/WebP: up to five, 8 MB each; suggested angles are shown. Photos stay in memory across form close/reopen and language changes; removing or clearing revokes URLs. Refreshing/closing the browser tab removes photos. Text is validated and saved for seven days without consent; older drafts migrate. Calculator state remains until explicitly cleared.
+
+There is **no live lead-upload backend**. On browsers supporting file sharing, the customer can pass the actual selected files and message to an application through the device share menu, choose WhatsApp and complete sending to PRIME there. Otherwise, photos must be attached manually in WhatsApp. Sharing, cancellation and acknowledged server delivery are distinct states; no false sent/booking confirmation is shown. Clipboard and manual-copy fallbacks are provided. The submission API interface only reports server success on explicit acknowledgement. Fleet has its own form and the same transparent WhatsApp handoff, not the consumer calculator. Current forms do not create public database-write endpoints. A future real upload endpoint requires server validation, private storage, rate limits, anti-spam, retention and notification configuration.
+
+## Blog and admin
+
+See [CMS-SETUP.md](CMS-SETUP.md). The supplied public Supabase settings are local and untracked. The table is not yet created, so CMS remains disabled. Apply the migration, create an editor, assign the editor UUID, enable the flag and deploy once. Routine publishing then needs no Git/redeploy. RLS restricts public reads to published/date-eligible posts; only assigned editors can write/upload. Raw HTML is never executed. Images in the blog bucket are public publication assets, not customer enquiry photos.
+
+Draft, publish, unpublish, delete with confirmation, preview, cover/article images, SEO fields, scheduling and translation groups are implemented. Vercel renders article metadata/content and a dynamic sitemap from public data. Local Vite tests the client; server handlers have separate tests.
+
+`npm run qa:cms` expects a local Vite QA server on 5175 with `VITE_CMS_ENABLED=true` in ignored `.env.qa.local`. Example: `npm run dev -- --mode qa --port 5175`. The script intercepts every Supabase request and makes **no real backend changes**. Actual RLS/account validation awaits owner setup.
+
+## Assets and launch states
+
+[CREDITS.md](CREDITS.md) documents the one remaining licensed illustrative interior image. Hero has responsive WebP sizes, dimensions and high fetch priority. Removed the weak detail photograph and identical before/after demonstration. Real cases are absent; show an honest launch state. Reviews stay hidden. Add consented case pairs in `cases.ts`; the reusable native range comparison supports keyboard, mouse and touch.
+
+Equipment has editorial composition, prominent Puzzi, paired chemistry/brush explanations, hair tools, wide EcoFlow and the package table. Real product photographs have not been supplied; all slots are intentionally empty and render clean text rather than fake assets. `equipmentPhotos` accepts source, dimensions and credit. Do not invent chemical brands or station specifications.
+
+## Analytics and privacy
+
+No analytics provider is active. Events include pricing view, package/size/power selection, calculator start/complete, quote start/photo selection/handoff, Family & Pet click, fleet start/handoff, phone/WhatsApp/Facebook, language and article views. Runtime property allowlists exclude all free text and contact details. Configure a provider and appropriate consent UI before enabling GA4/Meta; `setTrackingConsent` defaults false. Provider failures never interrupt forms.
+
+## Deployment
+
+Vercel: Vite preset, project root `./`, `npm ci`, `npm run build`, output `dist`, Node 22+; production branch `main`. Existing GitHub integration should deploy an ordinary push. Configure `VITE_SITE_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_CMS_ENABLED` in Vercel as well as local `.env`. **Never** use service-role credentials in `VITE_*`. Without CMS settings the main site and WhatsApp flows remain functional and the blog is empty.
+
+`vercel.json` preserves localized SPA pages, directs article URLs to server metadata, and `/sitemap.xml` to the dynamic sitemap. Admin routes are noindex and excluded from the sitemap. No ratings or invented address in structured data. Current infrastructure uses Vercel functions only for public blog/SEO reads, not lead collection.
+
+## Owner items
+
+[OWNER-CHECKLIST.md](OWNER-CHECKLIST.md) lists photographs, genuine cases/reviews, legal details and integration setup still required. [REDESIGN-LOG.md](REDESIGN-LOG.md) records audit, market research and verification. All work remains in the original local repository.

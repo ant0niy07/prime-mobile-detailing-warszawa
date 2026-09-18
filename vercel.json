@@ -1,16 +1,46 @@
 {
   "rewrites": [
     {
-      "source": "/:lang(pl|en|ru)/privacy",
-      "destination": "/:lang/privacy/index.html"
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/:lang(pl|en|ru)/blog/:slug",
+      "destination": "/api/blog?lang=:lang&slug=:slug"
+    },
+    {
+      "source": "/:lang(pl|en|ru)/:page(privacy|floty|blog)",
+      "destination": "/:lang/:page/index.html"
     },
     {
       "source": "/:lang(pl|en|ru)",
       "destination": "/:lang/index.html"
     },
     {
-      "source": "/((?!assets/|images/|flags/|favicon.svg|og.jpg|robots.txt|sitemap.xml).*)",
+      "source": "/((?!api/|assets/|images/|flags/|favicon.svg|og.jpg|robots.txt|sitemap.xml).*)",
       "destination": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/blog.mjs": {
+      "includeFiles": "dist/index.html"
+    }
+  },
+  "redirects": [
+    {
+      "source": "/admin",
+      "destination": "/pl/admin",
+      "permanent": false
+    },
+    {
+      "source": "/blog",
+      "destination": "/pl/blog",
+      "permanent": true
+    },
+    {
+      "source": "/floty",
+      "destination": "/pl/floty",
+      "permanent": true
     }
   ]
 }

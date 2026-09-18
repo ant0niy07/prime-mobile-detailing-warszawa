@@ -1,9 +1,11 @@
 import seo from "./seo.json";
+import { pricing } from "./pricing";
 export const business = {
-  name: "PRIME Mobile Detailing",
+  name: "Prime Mob Detail",
   logo: "PRIME",
-  descriptor: "Mobile Detailing Warszawa",
+  descriptor: "MOB DETAIL / WARSZAWA",
   phone: "+48 690 747 691",
+  telephoneUrl: "tel:+48690747691",
   whatsappNumber: "48690747691",
   whatsappUrl: "https://wa.me/48690747691",
   facebook: "https://www.facebook.com/profile.php?id=61594147304659",
@@ -24,11 +26,7 @@ export const business = {
     "Praga",
     "Bemowo",
   ],
-  packages: [
-    { id: "basic", name: "BASIC", price: 199 },
-    { id: "plus", name: "BASIC PLUS", price: 299 },
-    { id: "premium", name: "PREMIUM", price: 449 },
-  ],
+  packages: pricing.packages,
   siteUrl: (import.meta.env.VITE_SITE_URL || seo.fallbackUrl).replace(
     /\/$/,
     "",

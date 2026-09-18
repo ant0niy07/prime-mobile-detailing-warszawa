@@ -18,7 +18,7 @@ const q: Quote = {
   district: "Mokotów",
   name: "Anna",
   phone: "+48 600 111 222",
-  conditions: ["hair", "fabric"],
+  problems: ["hair", "stains"],
   flexible: true,
   consent: true,
 };
@@ -33,7 +33,6 @@ describe("quote and message", () => {
           "district",
           "name",
           "phone",
-          "conditions",
           "consent",
           "date",
         ]),
@@ -62,17 +61,17 @@ describe("quote and message", () => {
       const message = buildMessage(q, t, 3);
       expect(message).toContain(t.form.messageTitle);
       expect(message).toContain(`${t.form.selectedPhotos}: 3`);
-      expect(message).toContain(t.form.conditionOptions[4]);
+      expect(message).toContain(t.calculator.problemOptions[0]);
       expect(message).toContain(q.phone);
-      expect(message).toContain(t.form.help);
+      expect(message).toContain("BASIC PLUS");
       expect(whatsappLink(message)).toBe(
         `https://wa.me/48690747691?text=${encodeURIComponent(message)}`,
       );
-      expect(summaryRows(q, t, 3)).toHaveLength(14);
+      expect(summaryRows(q, t, 3)).toHaveLength(18);
     },
   );
   it("uses the exact centralized starting prices", () => {
-    expect(business.packages.map((p) => p.price)).toEqual([199, 299, 449]);
+    expect(business.packages.map((p) => p.price)).toEqual([249, 349, 499, 649]);
   });
 });
 describe("safe photo selection", () => {
@@ -106,7 +105,7 @@ describe("safe photo selection", () => {
       ),
     ).toBe(dictionaries.en.form.typeError);
   });
-  it("rejects oversized images and a ninth image", () => {
+  it("rejects oversized images and a sixth image", () => {
     const file = new File(["x"], "a.jpg", { type: "image/jpeg" });
     Object.defineProperty(file, "size", { value: 8 * 1024 * 1024 + 1 });
     expect(validatePhoto(file, 0, dictionaries.pl.form)).toBe(
@@ -115,7 +114,7 @@ describe("safe photo selection", () => {
     expect(
       validatePhoto(
         new File(["x"], "a.png", { type: "image/png" }),
-        8,
+        5,
         dictionaries.pl.form,
       ),
     ).toBe(dictionaries.pl.form.countError);
@@ -137,11 +136,11 @@ describe("local draft", () => {
       DRAFT_KEY,
       JSON.stringify({
         expires: Date.now() + 99999,
-        data: { ...q, size: "bad", conditions: ["hair", "wrong"] },
+        data: { ...q, size: "bad", problems: ["hair", "wrong"] },
       }),
     );
     expect(loadDraft().size).toBe("sedan");
-    expect(loadDraft().conditions).toEqual(["hair"]);
+    expect(loadDraft().problems).toEqual(["hair"]);
   });
 });
 describe("clipboard", () => {

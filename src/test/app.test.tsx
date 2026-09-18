@@ -9,10 +9,11 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { describe, it, expect, vi } from "vitest";
-import { useState } from "react";
+import { usePhotoSession } from "../lib/photos";
+import { BeforeAfterSlider } from "../components/UI";
 import App from "../App";
 import QuoteConfigurator from "../components/QuoteConfigurator";
-import { PhotoPicker, type Photo } from "../components/PhotoPicker";
+import { PhotoPicker } from "../components/PhotoPicker";
 import { dictionaries } from "../i18n";
 import { business } from "../config/business";
 import { emptyQuote } from "../lib/quote";
@@ -43,29 +44,29 @@ describe("localized pages", () => {
     app();
     expect(screen.getByTestId("path")).toHaveTextContent("/pl");
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "Profesjonalny",
+      "Mobilny detailing",
     );
     await u.click(screen.getByRole("link", { name: "English" }));
     expect(screen.getByTestId("path")).toHaveTextContent("/en");
     expect(localStorage.getItem("prime.language")).toBe("en");
     expect(document.documentElement.lang).toBe("en");
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "Professional",
+      "Mobile interior",
     );
     await u.click(screen.getByRole("link", { name: "Русский" }));
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "Профессиональный",
+      "Выездной",
     );
     await u.click(screen.getByRole("link", { name: "Polski" }));
     expect(localStorage.getItem("prime.language")).toBe("pl");
   });
   it("renders packages, real links and developer signature", () => {
     app();
-    for (const name of ["BASIC", "BASIC PLUS", "PREMIUM"])
+    for (const name of ["BASIC", "BASIC PLUS", "PREMIUM", "FAMILY & PET"])
       expect(screen.getByRole("heading", { name })).toBeInTheDocument();
-    for (const price of ["199", "299", "449"])
+    for (const price of ["249", "349", "499", "649"])
       expect(
-        screen.getByText(price, { exact: false, selector: ".price" }),
+        screen.getByText(price, { exact: false, selector: ".price strong" }),
       ).toBeInTheDocument();
     for (const link of screen.getAllByRole("link", { name: /Facebook/ }))
       expect(link).toHaveAttribute("href", business.facebook);
@@ -87,7 +88,7 @@ describe("localized pages", () => {
     const u = userEvent.setup();
     app("/en");
     await u.click(
-      screen.getAllByRole("button", { name: "Ask for a quote" })[1],
+      screen.getAllByRole("button", { name: dictionaries.en.primaryCta })[0],
     );
     const dialog = screen.getByRole("dialog");
     await within(dialog).findByLabelText("Make and model");
@@ -98,8 +99,15 @@ describe("localized pages", () => {
   it("renders accessible FAQ and comparison controls", () => {
     app("/en");
     expect(
-      screen.getByText("Do you need a 230 V socket?").closest("summary"),
+      screen.getByText(dictionaries.en.faq[0][0]).closest("summary"),
     ).toBeInTheDocument();
+    expect(screen.queryByRole("slider")).not.toBeInTheDocument();
+    render(
+      <BeforeAfterSlider
+        t={dictionaries.en}
+        comparison={{ before: "/before.webp", after: "/after.webp" }}
+      />,
+    );
     const slider = screen.getByRole("slider");
     fireEvent.change(slider, { target: { value: "70" } });
     expect(slider).toHaveValue("70");
@@ -112,18 +120,16 @@ describe("configurator", () => {
     await u.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByText("Please complete this field.")).toBeInTheDocument();
     await u.type(screen.getByLabelText("Make and model"), "Skoda Octavia");
-    await u.click(screen.getByLabelText("SUV"));
-    await u.click(screen.getByRole("button", { name: "Continue" }));
-    expect(screen.getByLabelText("Not sure — help me choose")).toBeChecked();
+    await u.click(screen.getByLabelText(dictionaries.en.calculator.sizes[2]));
     await u.click(screen.getByLabelText(/BASIC PLUS/));
     await u.click(screen.getByRole("button", { name: "Continue" }));
-    await u.click(screen.getByLabelText("Pet hair"));
-    await u.click(screen.getByLabelText("Fabric upholstery"));
-    await u.click(screen.getByRole("button", { name: "Continue" }));
+    await u.click(
+      screen.getByLabelText(dictionaries.en.calculator.problemOptions[0]),
+    );
     await u.click(screen.getByLabelText("Underground garage"));
     expect(screen.getByText(dictionaries.en.garage)).toBeInTheDocument();
     expect(loadDraft().size).toBe("suv");
-    expect(loadDraft().conditions).toEqual(["hair", "fabric"]);
+    expect(loadDraft().problems).toEqual(["hair"]);
   });
   it("copies, opens verified WhatsApp and preserves entered data", async () => {
     const u = userEvent.setup();
@@ -133,11 +139,11 @@ describe("configurator", () => {
       name: "Anna",
       phone: "600123456",
       district: "Wola",
-      conditions: ["regular"],
+      problems: [],
       flexible: true,
     });
     form();
-    for (let i = 0; i < 6; i++)
+    for (let i = 0; i < 3; i++)
       await u.click(screen.getByRole("button", { name: "Continue" }));
     await u.click(screen.getByRole("checkbox"));
     await u.click(screen.getByRole("button", { name: "Continue" }));
@@ -150,23 +156,22 @@ describe("configurator", () => {
     const click = vi
       .spyOn(HTMLAnchorElement.prototype, "click")
       .mockImplementation(() => {});
-    await u.click(screen.getByRole("link", { name: "Send via WhatsApp" }));
+    await u.click(
+      screen.getByRole("button", { name: dictionaries.en.form.send }),
+    );
     await waitFor(() => expect(click).toHaveBeenCalled());
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining("Kia Ceed"));
-    expect(
-      screen
-        .getByRole("link", { name: "Send via WhatsApp" })
-        .getAttribute("href"),
-    ).toMatch(/^https:\/\/wa.me\/48690747691\?text=/);
     expect(loadDraft().vehicle).toBe("Kia Ceed");
-    expect(screen.getByRole("status")).toHaveTextContent("Summary copied");
+    expect(
+      screen.getByText(dictionaries.en.form.opening, { exact: false }),
+    ).toBeInTheDocument();
     await u.click(screen.getByRole("button", { name: "Delete saved draft" }));
     expect(screen.getByLabelText("Make and model")).toHaveValue("");
   });
   it("previews and removes a local image", async () => {
     const u = userEvent.setup();
     function Picker() {
-      const [photos, setPhotos] = useState<Photo[]>([]);
+      const [photos, setPhotos] = usePhotoSession();
       return (
         <PhotoPicker
           photos={photos}

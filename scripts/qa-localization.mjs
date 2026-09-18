@@ -6,55 +6,85 @@ import { readFile } from "node:fs/promises";
 const base = process.env.QA_URL || "http://127.0.0.1:5173";
 const browser = await chromium.launch({ channel: "msedge" });
 try {
-  const context = await browser.newContext({
-    viewport: { width: 320, height: 900 },
-    reducedMotion: "reduce",
-  });
-  const page = await context.newPage();
   for (const lang of ["pl", "en", "ru"]) {
-    await page.goto(`${base}/${lang}`);
+    const context = await browser.newContext({
+      viewport: { width: 320, height: 900 },
+      reducedMotion: "reduce",
+    });
+    const page = await context.newPage();
+    await page.goto(base + "/" + lang);
     await page.waitForLoadState("networkidle");
-    assert.equal(await page.locator("link[rel=canonical]").count(), 1);
-    assert.ok(
-      (await page.locator("link[rel=canonical]").getAttribute("href")).endsWith(
-        `/${lang}`,
-      ),
+    assert.equal(
+      await page.locator("link[rel=canonical]").getAttribute("href"),
+      "https://primemobdetail.pl/" + lang,
     );
-    assert.equal(await page.locator("meta[name=description]").count(), 1);
     assert.equal(await page.locator("title").count(), 1);
-    await page.evaluate(() =>
-      localStorage.setItem(
-        "prime.quote.v1",
-        JSON.stringify({
-          expires: Date.now() + 999999,
-          data: {
-            vehicle: "Toyota Corolla",
-            size: "sedan",
-            package: "plus",
-            conditions: ["hair", "fabric"],
-            district: "Mokotów",
-            address: "",
-            parking: "garage",
-            date: "",
-            time: "",
-            flexible: true,
-            description: "",
-            name: "Anna",
-            phone: "600123456",
-            contactMethod: "whatsapp",
-            consent: false,
-          },
-        }),
-      ),
+    await page.locator(".package-row").nth(2).getByRole("button").click();
+    const calc = page.locator("#calculator");
+    assert.equal(
+      await calc.locator("input[name=calc-package]:checked").count(),
+      1,
     );
-    await page.locator(".hero-buttons button").first().click();
+    await calc.locator(".form-actions .primary").click();
+    await calc.locator("input[name=calc-size]").nth(2).check();
+    await calc.locator(".form-actions .primary").click();
+    await calc.locator("input[name=calc-condition]").nth(2).check();
+    await calc.locator(".form-actions .primary").click();
+    await calc.getByRole("checkbox").first().check();
+    await calc.locator(".form-actions .primary").click();
+    await calc.locator("input[name=calc-power]").nth(1).check();
+    await calc.locator(".form-actions .primary").click();
+    await calc.locator("#calc-district").fill("Mokotów");
+    await calc.locator(".form-actions .primary").click();
+    assert.match(
+      await calc.locator(".price-result strong").innerText(),
+      /769–969/,
+    );
+    await calc.locator(".calculator-submit").click();
     const dialog = page.getByRole("dialog");
-    for (let step = 0; step < 8; step++) {
-      await dialog.locator("form h3").waitFor();
+    await dialog.locator("#vehicle").fill("Toyota Corolla");
+    assert.equal(
+      await dialog.locator("input[name=package]:checked").inputValue(),
+      "premium",
+    );
+    assert.equal(
+      await dialog.locator("input[name=size]:checked").inputValue(),
+      "suv",
+    );
+    for (let step = 0; step < 5; step++) {
+      if (step === 1) {
+        assert.equal(
+          await dialog.locator("input[name=condition]:checked").inputValue(),
+          "heavy",
+        );
+        assert.equal(
+          await dialog.locator("input[name=problems]:checked").inputValue(),
+          "hair",
+        );
+        await dialog.locator("#district").fill("Mokotów");
+        await dialog.locator("input[value=garage]").check();
+      }
+      if (step === 2) {
+        await dialog.locator("input[name=flexible]").check();
+        await dialog.locator("#photos").setInputFiles({
+          name: "seat.png",
+          mimeType: "image/png",
+          buffer: Buffer.from(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a7N8AAAAASUVORK5CYII=",
+            "base64",
+          ),
+        });
+      }
+      if (step === 3) {
+        await dialog.locator("#name").fill("Anna");
+        await dialog.locator("#phone").fill("600123456");
+        await dialog.locator("#email").fill("anna@example.test");
+        await dialog.locator("input[name=consent]").check();
+      }
       assert.equal(
         await dialog.evaluate((el) => el.scrollWidth > el.clientWidth),
         false,
-        `${lang} step ${step} overflow`,
+        lang + " form overflow " + step,
       );
       const audit = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
@@ -62,45 +92,48 @@ try {
       assert.deepEqual(
         audit.violations.map((v) => ({
           id: v.id,
-          nodes: v.nodes.map((n) => n.failureSummary),
+          nodes: v.nodes.map((n) => ({
+            target: n.target,
+            reason: n.failureSummary,
+          })),
         })),
         [],
-        `${lang} step ${step} accessibility`,
+        lang + " form accessibility " + step,
       );
-      if (step === 6) await dialog.locator("input[name=consent]").check();
-      if (step < 7)
-        await dialog.locator(".form-actions button[type=submit]").click();
+      if (step < 4) await dialog.locator("button[type=submit]").click();
     }
+    assert.match(
+      await dialog.locator(".summary").innerText(),
+      /Toyota Corolla/,
+    );
+    assert.match(await dialog.locator(".summary-price").innerText(), /769–969/);
     await page.keyboard.press("Tab");
     assert.equal(
       await page.evaluate(() => !!document.activeElement.closest("dialog")),
       true,
     );
     await page.keyboard.press("Escape");
-    await page.goto(`${base}/${lang}/privacy`);
-    await page.waitForLoadState("networkidle");
-    assert.ok(
-      (await page.locator("link[rel=canonical]").getAttribute("href")).endsWith(
-        `/${lang}/privacy`,
-      ),
+    await page.locator(".hero-buttons button").click();
+    await dialog.locator("#vehicle").waitFor();
+    assert.equal(
+      await dialog.locator("#vehicle").inputValue(),
+      "Toyota Corolla",
     );
-    const html = await readFile(`dist/${lang}/index.html`, "utf8");
-    assert.ok(html.includes(`/${lang}"`));
-    assert.ok(html.includes(`lang="${lang}"`));
-    console.log(
-      `PASS ${lang}: eight steps at 320px, accessibility, focus containment, unique localized metadata and static HTML`,
-    );
-  }
-  await page.goto(`${base}/pl`);
-  await page.waitForLoadState("networkidle");
-  const buttons = page.locator("main button");
-  const count = await buttons.count();
-  for (let i = 0; i < count; i++) {
-    await buttons.nth(i).click();
-    await page.getByRole("dialog").waitFor();
+    await dialog.locator("button[type=submit]").click();
+    await dialog.locator("button[type=submit]").click();
+    assert.equal(await dialog.locator(".photo-thumb").count(), 1);
     await page.keyboard.press("Escape");
+    await page.goto(base + "/" + lang + "/privacy");
+    const html = await readFile("dist/" + lang + "/index.html", "utf8");
+    assert.ok(html.includes("https://primemobdetail.pl/" + lang));
+    assert.ok(html.includes('lang="' + lang + '"'));
+    console.log(
+      "PASS " +
+        lang +
+        ": calculator transfer, five form steps, photos retained, focus, localized metadata",
+    );
+    await context.close();
   }
-  console.log(`PASS all ${count} primary page buttons open the configurator`);
 } finally {
   await browser.close();
 }

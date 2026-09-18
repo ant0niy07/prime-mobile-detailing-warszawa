@@ -3,6 +3,11 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  test: { environment: "jsdom", setupFiles: "./src/test/setup.ts", css: false },
+  test: {
+    include: ["src/test/**/*.{test,spec}.{ts,tsx}"],
+    environment: "jsdom",
+    setupFiles: "./src/test/setup.ts",
+    css: false,
+  },
   build: { chunkSizeWarningLimit: 600 },
 });

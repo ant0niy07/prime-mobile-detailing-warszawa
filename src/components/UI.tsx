@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { motion, useReducedMotion } from "motion/react";
+
 import {
   ArrowUpRight,
   ChevronDown,
@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type { Dictionary } from "../i18n";
 import { business } from "../config/business";
-import { gallery } from "../config/gallery";
+import { track } from "../lib/tracking";
 export function Container({
   children,
   className = "",
@@ -25,19 +25,9 @@ export function MotionReveal({
   children: ReactNode;
   className?: string;
 }) {
-  const reduced = useReducedMotion();
-  return (
-    <motion.div
-      className={className}
-      initial={reduced ? false : { opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.1 }}
-      transition={{ duration: 0.45 }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }
+
 export function QuoteButton({
   children,
   onClick,
@@ -70,6 +60,7 @@ export function WhatsAppAction({
       target="_blank"
       rel="noopener noreferrer"
       className={`btn whatsapp ${className}`}
+      onClick={() => track("click_whatsapp")}
     >
       <MessageCircle size={19} />
       {children}
@@ -93,7 +84,7 @@ export function Photo({
       className={className}
       src={`${base}-1200.webp`}
       srcSet={`${base}-640.webp 640w, ${base}-1200.webp 1200w, ${base}-1920.webp 1920w`}
-      sizes={hero ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
+      sizes="(max-width: 768px) 100vw, 50vw"
       width="1920"
       height="1280"
       alt={alt}
@@ -102,23 +93,29 @@ export function Photo({
     />
   );
 }
-export function BeforeAfterSlider({ t }: { t: Dictionary }) {
+export function BeforeAfterSlider({
+  t,
+  comparison,
+}: {
+  t: Dictionary;
+  comparison: { before: string; after: string; alt?: string };
+}) {
   const [value, setValue] = useState(50);
   return (
     <figure className="comparison">
       <div className="comparison-images">
         <img
-          src={gallery.comparison.before}
-          alt={`${t.before} — ${t.interiorAlt}`}
+          src={comparison.before}
+          alt={`${t.before} — ${comparison.alt || t.interiorAlt}`}
           width="1200"
           height="800"
           loading="lazy"
         />
         <img
           className="comparison-after"
-          src={gallery.comparison.after}
+          src={comparison.after}
           style={{ clipPath: `inset(0 0 0 ${value}%)` }}
-          alt={`${t.after} — ${t.interiorAlt}`}
+          alt={`${t.after} — ${comparison.alt || t.interiorAlt}`}
           width="1200"
           height="800"
           loading="lazy"
@@ -137,11 +134,7 @@ export function BeforeAfterSlider({ t }: { t: Dictionary }) {
           aria-label={t.compareLabel}
         />
       </div>
-      <figcaption>
-        {gallery.comparison.kind === "illustrative"
-          ? t.comparisonDemo
-          : t.resultDisclaimer}
-      </figcaption>
+      <figcaption>{t.resultDisclaimer}</figcaption>
     </figure>
   );
 }
