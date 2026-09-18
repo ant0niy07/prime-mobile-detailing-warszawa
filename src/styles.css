@@ -2981,3 +2981,116 @@ legend {
     scroll-padding-bottom: 90px;
   }
 }
+/* Equipment photographs: large editorial spreads, with compact tool notes between them. */
+.equipment-story.with-photo {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(32px, 6vw, 90px);
+}
+.equipment-story.with-photo .equipment-name {
+  min-width: 0;
+}
+.equipment-name picture,
+.power-statements picture {
+  display: block;
+}
+.equipment-story.with-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+}
+.equipment-story.with-photo figure {
+  margin: 32px 0 0;
+}
+.equipment-story.with-photo .equipment-explanation {
+  padding-block: 30px;
+}
+.equipment-puzzi.with-photo {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+}
+.equipment-puzzi.with-photo .equipment-name {
+  order: 2;
+  padding-left: 0;
+}
+.equipment-puzzi.with-photo .equipment-explanation {
+  order: 1;
+}
+.equipment-puzzi.with-photo picture {
+  aspect-ratio: 1.5;
+  overflow: hidden;
+}
+.equipment-puzzi.with-photo img {
+  height: 100%;
+  object-fit: cover;
+}
+.equipment-chemicals.with-photo {
+  display: grid;
+  flex-basis: 100%;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.equipment-chemicals.with-photo .equipment-name h3 {
+  font-size: clamp(32px, 3.5vw, 48px);
+}
+.equipment-chemicals.with-photo figure {
+  max-width: 510px;
+}
+.equipment-chemicals.with-photo .equipment-explanation {
+  margin-top: 0;
+}
+.equipment-name figcaption a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.equipment-brushes,
+.equipment-hair {
+  display: block;
+  flex-basis: calc(50% - 35px);
+}
+.equipment-hair .equipment-explanation {
+  margin-top: 30px;
+}
+.power-feature {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 48px;
+}
+.power-statements {
+  min-width: 0;
+}
+.power-statements picture {
+  background: white;
+  aspect-ratio: 1.34;
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+.power-statements img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  object-position: center bottom;
+}
+@media (max-width: 767px) {
+  .equipment-story.with-photo,
+  .equipment-puzzi.with-photo,
+  .equipment-chemicals.with-photo,
+  .power-feature {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .equipment-puzzi.with-photo .equipment-name,
+  .equipment-puzzi.with-photo .equipment-explanation {
+    order: initial;
+  }
+  .equipment-story.with-photo .equipment-explanation {
+    padding: 0;
+  }
+  .equipment-story.with-photo figure {
+    margin-top: 24px;
+  }
+  .equipment-brushes,
+  .equipment-hair {
+    flex-basis: 100%;
+  }
+}

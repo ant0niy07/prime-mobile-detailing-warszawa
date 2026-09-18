@@ -6,9 +6,39 @@ import {
   equipmentIds,
   equipmentPhotos,
   equipmentMatrix,
+  type EquipmentPhoto,
 } from "../config/equipment";
 import { equipmentCopy } from "../i18n/equipment";
 import { Container, MotionReveal } from "./UI";
+function EquipmentImage({
+  photo,
+  alt,
+}: {
+  photo: EquipmentPhoto;
+  alt: string;
+}) {
+  const sizes =
+    "(max-width: 767px) calc(100vw - 40px), (max-width: 1200px) 48vw, 680px";
+  const srcSet = (extension: string) =>
+    photo.widths
+      .map((width) => `${photo.base}-${width}.${extension} ${width}w`)
+      .join(", ");
+  return (
+    <picture>
+      <source type="image/avif" srcSet={srcSet("avif")} sizes={sizes} />
+      <img
+        src={photo.src}
+        srcSet={srcSet("webp")}
+        sizes={sizes}
+        alt={alt}
+        width={photo.width}
+        height={photo.height}
+        loading="lazy"
+        decoding="async"
+      />
+    </picture>
+  );
+}
 export function EquipmentSection({
   lang,
   garage,
@@ -41,14 +71,26 @@ export function EquipmentSection({
                   <h3>{item.name}</h3>
                   {photo && (
                     <figure>
-                      <img
-                        src={photo.src}
-                        alt={`${t.photoLabel}: ${item.name}`}
-                        width={photo.width}
-                        height={photo.height}
-                        loading="lazy"
+                      <EquipmentImage
+                        photo={photo}
+                        alt={
+                          photo.illustrative
+                            ? t.chemistryAlt
+                            : `${t.photoLabel}: ${item.name}`
+                        }
                       />
-                      <figcaption>{photo.credit}</figcaption>
+                      {photo.credit && (
+                        <figcaption>
+                          {photo.illustrative && <>{t.illustrativePhoto} · </>}
+                          <a
+                            href={photo.source}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {photo.credit}
+                          </a>
+                        </figcaption>
+                      )}
                     </figure>
                   )}
                 </div>
@@ -87,13 +129,7 @@ export function EquipmentSection({
           </div>
           <div className="power-statements">
             {equipmentPhotos.power ? (
-              <img
-                src={equipmentPhotos.power.src}
-                alt="EcoFlow Delta 3"
-                width={equipmentPhotos.power.width}
-                height={equipmentPhotos.power.height}
-                loading="lazy"
-              />
+              <EquipmentImage photo={equipmentPhotos.power} alt={t.powerAlt} />
             ) : (
               <PlugZap size={48} strokeWidth={1.2} />
             )}

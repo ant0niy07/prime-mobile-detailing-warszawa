@@ -51,7 +51,7 @@ export const equipmentCopy = {
           "Dodatkowy zakres w standardowych pakietach. Rozszerzona praca z sierścią w FAMILY & PET.",
       },
     ],
-    powerCategory: "WŁASNE ZASILANIE / ECOFLOW DELTA 3",
+    powerCategory: "WŁASNE ZASILANIE / ECOFLOW",
     powerTitle: "Prąd przywozimy ze sobą.",
     powerText:
       "Brak dostępu do gniazdka 230 V? W razie potrzeby możemy przywieźć własne zasilanie i wykonać usługę bez korzystania z prądu klienta.",
@@ -82,6 +82,9 @@ export const equipmentCopy = {
     },
     packageLabel: "Pakiety",
     photoLabel: "Zdjęcie sprzętu",
+    powerAlt: "Przenośna stacja zasilania EcoFlow",
+    chemistryAlt: "Butelki profesjonalnych środków do pielęgnacji samochodów",
+    illustrativePhoto: "Zdjęcie poglądowe chemii detailingowej",
   },
   en: {
     eyebrow: "03 / EQUIPMENT THAT DOES THE WORK",
@@ -135,7 +138,7 @@ export const equipmentCopy = {
           "Additional work with standard packages. Extended hair removal in FAMILY & PET.",
       },
     ],
-    powerCategory: "INDEPENDENT POWER / ECOFLOW DELTA 3",
+    powerCategory: "INDEPENDENT POWER / ECOFLOW",
     powerTitle: "We bring the power.",
     powerText:
       "No suitable 230 V socket nearby? We can bring independent power when needed and work without using your electricity.",
@@ -166,6 +169,9 @@ export const equipmentCopy = {
     },
     packageLabel: "Packages",
     photoLabel: "Equipment photograph",
+    powerAlt: "EcoFlow portable power station",
+    chemistryAlt: "Bottles of professional car care products",
+    illustrativePhoto: "Illustrative detailing products photograph",
   },
   ru: {
     eyebrow: "03 / ОБОРУДОВАНИЕ, КОТОРОЕ РАБОТАЕТ НА РЕЗУЛЬТАТ",
@@ -219,7 +225,7 @@ export const equipmentCopy = {
           "Дополнительная работа в стандартных пакетах. Расширенное удаление шерсти в FAMILY & PET.",
       },
     ],
-    powerCategory: "СВОЁ ПИТАНИЕ / ECOFLOW DELTA 3",
+    powerCategory: "СВОЁ ПИТАНИЕ / ECOFLOW",
     powerTitle: "Электричество привозим с собой.",
     powerText:
       "Нет подходящей розетки 230 В? При необходимости привезём собственное питание и выполним услугу без электричества клиента.",
@@ -250,5 +256,8 @@ export const equipmentCopy = {
     },
     packageLabel: "Пакеты",
     photoLabel: "Фотография оборудования",
+    powerAlt: "Портативная электростанция EcoFlow",
+    chemistryAlt: "Флаконы профессиональных средств для ухода за автомобилем",
+    illustrativePhoto: "Иллюстрация детейлинг-химии",
   },
 };

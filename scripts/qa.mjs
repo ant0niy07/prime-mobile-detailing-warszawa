@@ -34,6 +34,19 @@ try {
       assert.equal(await page.locator("h1").count(), 1);
       assert.equal(await page.locator(".package-row").count(), 4);
       assert.equal(await page.locator("#equipment tbody tr").count(), 6);
+      assert.equal(await page.locator("#equipment picture").count(), 4);
+      for (const photo of await page.locator("#equipment picture img").all()) {
+        await photo.scrollIntoViewIfNeeded();
+        await photo.evaluate(async (img) => {
+          await img.decode();
+        });
+        assert.ok(
+          await photo.evaluate(
+            (img) => img.naturalWidth > 0 && img.currentSrc.endsWith(".avif"),
+          ),
+        );
+        assert.ok(await photo.getAttribute("alt"));
+      }
       assert.equal(await page.getByRole("slider").count(), 0);
       assert.deepEqual(
         await page

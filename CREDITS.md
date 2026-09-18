@@ -8,4 +8,11 @@ The photo page identifies the image as free under the [Unsplash License](https:/
 
 Logo typography, flags, favicon and OG layout were created for this project. Lucide icons are ISC licensed. Manrope, Inter and Geist Mono are locally bundled via Fontsource and distributed under the SIL Open Font License; package license files are available in the respective installed packages.
 
-The removed detail photograph and stock comparison are no longer shipped. Equipment slots remain empty pending genuine owner photographs or explicitly licensed product assets. Open Graph artwork is original typography, with no stock product photograph.
+The removed detail photograph and stock comparison are no longer shipped. Open Graph artwork is original typography, with no stock product photograph.
+
+## Equipment — added 19 September 2026
+
+- `public/images/equipment/{wd3,puzzi,ecoflow}-*`: exact images supplied by the owner for this website. Originals and attachment identifiers are preserved in `assets/equipment/`. They were resized and encoded as AVIF/WebP without changing product details or upscaling.
+- `public/images/equipment/chemicals-*`: Hasan Gulec, [Plastic Bottles with Car Care Products](https://www.pexels.com/photo/plastic-bottles-with-car-care-products-11139243/), [Pexels license](https://www.pexels.com/license/), checked 19 September 2026. Website/commercial use is permitted. Visible credit and a localized illustrative-image caption prevent the stock photograph from being presented as PRIME's confirmed inventory or a brand endorsement.
+
+See `assets/equipment/README.md` for provenance and reproduction. All website image files are served locally.
